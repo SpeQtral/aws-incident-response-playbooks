@@ -62,7 +62,10 @@ The immediate task will be to disable compromised credentials or revoke permissi
         1. [Revoke all current role sessions](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_revoke-sessions.html) (note that if the threat actor has the ability to obtain new credentials, this won’t solve the problem)
         2. If the threat actor is able to obtain another set of credentials and the activity continues, it will then be necessary to remove all IAM policies attached to the role, modify the attached policies to block all access, or modify the role’s trust policy to prevent the actor from assuming the role. As the credentials will remain valid for the specified time duration once issued, it is important to note that modifying the trust policy will allow any current valid credentials to continue to be used whilst still valid
             **Note that the above actions (step 2, substeps 1 and 2) will stop all users from using credentials obtained by assuming the role, including any legitimate users or applications**
-    3. If they are root user credentials, trigger a password reset. Ensure that the root user account email has not been compromised. In the event that there has been unauthorized access to the root user account email as well, escalate the issue to the relevant response team for Exchange mailbox compromise.
+    3. If they are root user credentials, a password reset must be triggered.
+        1. Ensure that the root user account email has not been compromised. In the event that there has been unauthorized access to the root user account email as well, escalate the issue to the relevant response team for Exchange mailbox compromise.
+        2. Once the root user account email has been secured, proceed to reset the root user account password. The password should be randomly-generated (i.e. not created by hand) in accordance to the organization's strong password guidelines by one of the custodians trusted with the handling of these root user credentials who has been confirmed to not have been responsible for the compromise, or failing that, the staff member leading the entire incident response.
+        3. Remove any existing MFA devices and provision MFA on a new pair of devices/tokens. Ensure that the MFA tokens are kept in proper custody throughout the remainder of the incident response.
 2. The compromised credentials should now be disabled. Verify this by checking the AWS CloudTrail console for the next 30 minutes or so for ongoing credential use, whether by access key, IAM user, or Role.
 
 ### Part 3: Eradicate the Incident
@@ -115,6 +118,9 @@ Now it is time to further investigate what API actions the compromised credentia
     1. Determine what (if any) application the resource belonged to, by checking in the CMDB, or confirming the resource’s tag(s) (Check AWS Config if the tags aren’t listed in the CloudTrail entry and the [resource is supported by AWS Config](https://docs.aws.amazon.com/config/latest/developerguide/resource-config-reference.html))
     2. If the deleted resource can be restored from backup, commence the restore procedure
     3. If the deleted resource cannot be restored from backup, consult the CMDB to obtain the resource’s configuration, and recreate the resource and configure it into the application’s infrastructure
+3. For root user credential compromise:
+    1. If the incident was determined in post-incident forensic investigation (see Part 5) to be due to neglect or malicious intent by one or more credential custodians, escalate the issue to the relevant departments (e.g. Human Resources) for disciplinary and legal action
+    2. Once the (remaining) custodian(s) are verified to be trustworthy, have them change the root user password to one known only to them, and re-enroll MFA using tokens in their custody
 
 ### Part 5: Post-Incident Activity
 
